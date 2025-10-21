@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdEdit, MdDelete } from 'react-icons/md';
+import { MdEdit, MdDelete, MdCode } from 'react-icons/md';
 import { Card } from '../common/Card';
 import type { ActionGuide } from '../../types/actionGuide';
 import { formatDate } from '../../utils/helpers';
@@ -11,9 +11,9 @@ interface ActionGuideCardProps {
 }
 
 const statusColors = {
-  draft: 'bg-yellow-100 text-yellow-800',
-  active: 'bg-green-100 text-green-800',
-  archived: 'bg-gray-100 text-gray-800',
+  draft: 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white',
+  active: 'bg-gradient-to-r from-green-400 to-emerald-500 text-white',
+  archived: 'bg-gradient-to-r from-gray-400 to-slate-500 text-white',
 };
 
 const statusLabels = {
@@ -29,37 +29,49 @@ export const ActionGuideCard: React.FC<ActionGuideCardProps> = ({
 }) => {
   return (
     <Card hoverable>
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-              {guide.name}
-            </h3>
-            <p className="text-sm text-gray-600">{guide.description}</p>
+      <div className="p-6">
+        {/* Header with Icon */}
+        <div className="flex items-start gap-4 mb-4">
+          <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+            <MdCode size={28} className="text-white" />
           </div>
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${
-              statusColors[guide.status]
-            }`}
-          >
-            {statusLabels[guide.status]}
-          </span>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h3 className="text-xl font-bold text-gray-900 truncate">
+                {guide.name}
+              </h3>
+              <span
+                className={`px-3 py-1 text-xs font-bold rounded-full shadow-sm flex-shrink-0 ${
+                  statusColors[guide.status]
+                }`}
+              >
+                {statusLabels[guide.status]}
+              </span>
+            </div>
+            <p className="text-sm text-gray-600 line-clamp-2">{guide.description}</p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-          <span>버전: {guide.version}</span>
-          <span>수정: {formatDate(guide.updatedAt)}</span>
+        {/* Metadata */}
+        <div className="flex items-center gap-4 text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-purple-600">v{guide.version}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <span>수정: {formatDate(guide.updatedAt)}</span>
+          </div>
         </div>
 
+        {/* Action Buttons */}
         <div className="flex gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onEdit(guide);
             }}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-50 text-blue-600 rounded hover:bg-blue-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 rounded-xl hover:from-blue-100 hover:to-purple-100 transition-all duration-200 border border-blue-200 hover:border-purple-300 shadow-sm hover:shadow"
           >
-            <MdEdit size={16} />
+            <MdEdit size={18} />
             수정
           </button>
           <button
@@ -69,10 +81,9 @@ export const ActionGuideCard: React.FC<ActionGuideCardProps> = ({
                 onDelete(guide.id);
               }
             }}
-            className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-all duration-200 border border-red-200 hover:border-red-300 shadow-sm hover:shadow"
           >
-            <MdDelete size={16} />
-            삭제
+            <MdDelete size={18} />
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { MdCompare, MdPlayArrow, MdRefresh, MdSave } from 'react-icons/md';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
 import { PromptView } from '../components/test/PromptView';
@@ -144,56 +145,76 @@ export const Test: React.FC = () => {
   const originalParsed = parseActionGuide(originalPrompt);
   const modifiedParsed = parseActionGuide(modifiedPrompt);
 
+  const statusConfig = {
+    idle: { emoji: '⚪', label: '대기중', color: 'text-gray-500' },
+    loading: { emoji: '🔵', label: '로딩중', color: 'text-blue-500' },
+    loaded: { emoji: '🟢', label: '성공', color: 'text-green-500' },
+    error: { emoji: '🔴', label: '실패', color: 'text-red-500' },
+  };
+
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="mb-6 bg-white p-4 rounded-lg shadow border border-gray-200">
-        <h3 className="text-lg font-semibold mb-3">
-          테스트 - Langfuse Observation 비교
-        </h3>
-        <div className="flex gap-2">
+      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 p-8 rounded-2xl shadow-xl text-white">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <MdCompare size={24} />
+          </div>
+          <div>
+            <h3 className="text-2xl font-bold">Langfuse Observation 비교</h3>
+            <p className="text-indigo-100 text-sm">프롬프트를 비교하고 테스트하세요</p>
+          </div>
+        </div>
+        <div className="flex gap-3">
           <Input
             placeholder="Langfuse Observation ID 입력..."
             value={observationId}
             onChange={setObservationId}
             className="flex-1"
           />
-          <Button onClick={handleLoadObservation} disabled={status === 'loading'}>
+          <Button
+            onClick={handleLoadObservation}
+            disabled={status === 'loading'}
+            variant="secondary"
+          >
             {status === 'loading' ? '로딩 중...' : '불러오기'}
           </Button>
         </div>
-        <div className="mt-2 text-sm">
-          상태:{' '}
-          {status === 'idle' && '⚪ 대기중'}
-          {status === 'loading' && '🔵 로딩중'}
-          {status === 'loaded' && '🟢 성공'}
-          {status === 'error' && '🔴 실패'}
+        <div className={`mt-4 text-sm font-medium ${statusConfig[status].color}`}>
+          <span className="mr-2">{statusConfig[status].emoji}</span>
+          상태: {statusConfig[status].label}
         </div>
       </div>
 
       {status === 'loaded' && (
         <>
           {/* Split View */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-2 gap-6">
             {/* Original */}
-            <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4 pb-2 border-b">
-                원본 (Original)
-              </h3>
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-indigo-100">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold">
+                  A
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">원본 (Original)</h3>
+              </div>
 
               <PromptView prompt={originalPrompt} />
               <ActionGuideView actionGuide={originalParsed} />
-              <div className="border-t pt-4 mt-4">
+              <div className="border-t-2 border-gray-100 pt-6 mt-6">
                 <ResponseView response={originalResponse} />
                 <MetadataView metadata={originalMetadata} />
               </div>
             </div>
 
             {/* Modified */}
-            <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-              <h3 className="text-lg font-semibold mb-4 pb-2 border-b">
-                수정본 (Modified)
-              </h3>
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border-2 border-purple-200">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-purple-200">
+                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center text-white font-bold">
+                  B
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">수정본 (Modified)</h3>
+              </div>
 
               <PromptView
                 prompt={modifiedPrompt}
@@ -202,20 +223,24 @@ export const Test: React.FC = () => {
               />
               <ActionGuideView actionGuide={modifiedParsed} />
 
-              <div className="flex gap-2 mb-4">
+              <div className="flex gap-2 mb-6">
                 <Button
                   onClick={handleExecuteLLM}
                   disabled={isExecuting}
                   variant="primary"
+                  className="flex-1"
                 >
-                  {isExecuting ? '실행 중...' : 'LLM 실행'}
+                  <div className="flex items-center justify-center gap-2">
+                    <MdPlayArrow size={20} />
+                    {isExecuting ? '실행 중...' : 'LLM 실행'}
+                  </div>
                 </Button>
                 <Button onClick={handleReset} variant="secondary">
-                  초기화
+                  <MdRefresh size={20} />
                 </Button>
               </div>
 
-              <div className="border-t pt-4">
+              <div className="border-t-2 border-gray-100 pt-6">
                 <ResponseView response={modifiedResponse} isLoading={isExecuting} />
                 <MetadataView metadata={modifiedMetadata} />
               </div>
@@ -224,24 +249,34 @@ export const Test: React.FC = () => {
 
           {/* Diff View */}
           {modifiedResponse && (
-            <div className="bg-white p-4 rounded-lg shadow border border-gray-200 mb-6">
-              <h3 className="text-lg font-semibold mb-4">비교 결과</h3>
+            <div className="bg-white/80 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200">
+              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                <MdCompare size={24} className="text-purple-600" />
+                비교 결과
+              </h3>
               <DiffView original={originalResponse} modified={modifiedResponse} />
             </div>
           )}
 
           {/* Actions */}
-          <div className="bg-white p-4 rounded-lg shadow border border-gray-200">
-            <div className="flex gap-2 justify-end">
+          <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-6 rounded-2xl shadow-xl">
+            <div className="flex gap-3 justify-end">
               <Button
                 onClick={handleSaveAsActionGuide}
-                variant="success"
+                variant="secondary"
                 disabled={!modifiedParsed.isValid}
+                size="lg"
               >
-                📋 액션가이드로 저장
+                <div className="flex items-center gap-2">
+                  <MdSave size={20} />
+                  액션가이드로 저장
+                </div>
               </Button>
-              <Button onClick={handleExecuteLLM} disabled={isExecuting}>
-                🔄 다시 시도
+              <Button onClick={handleExecuteLLM} disabled={isExecuting} variant="secondary" size="lg">
+                <div className="flex items-center gap-2">
+                  <MdRefresh size={20} />
+                  다시 시도
+                </div>
               </Button>
             </div>
           </div>
@@ -249,8 +284,11 @@ export const Test: React.FC = () => {
       )}
 
       {status === 'idle' && (
-        <div className="bg-white p-12 rounded-lg shadow border border-gray-200 text-center">
-          <p className="text-gray-500 mb-4">
+        <div className="bg-white/60 backdrop-blur-sm p-20 rounded-2xl border-2 border-dashed border-gray-300 text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <MdCompare size={40} className="text-purple-600" />
+          </div>
+          <p className="text-gray-600 text-lg mb-2 font-semibold">
             Langfuse Observation ID를 입력하고 '불러오기'를 클릭하세요
           </p>
           <p className="text-sm text-gray-400">
